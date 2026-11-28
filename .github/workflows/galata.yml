@@ -358,7 +358,7 @@ jobs:
             core/galata/test-results
             core/galata/test-results-replay
           if-no-files-found: ignore # expected when no tests fail
-          retention-days: 30
+          retention-days: ${{ job.status == 'failure' && 30 || 14 }}
 
       - name: Upload test report blob
         if: ${{ !cancelled() }}
@@ -468,7 +468,7 @@ jobs:
           name: galata-test-assets-chromium-examples-1
           path: core/galata/test-results
           if-no-files-found: ignore # expected when no tests fail
-          retention-days: 30
+          retention-days: ${{ job.status == 'failure' && 30 || 14 }}
 
       - name: Upload test report blob
         if: ${{ !cancelled() }}
@@ -570,7 +570,7 @@ jobs:
         with:
           name: visual-regression-report
           path: playwright-report
-          retention-days: 30
+          retention-days: 14
 
       - name: Inline the report
         uses: jupyterlab/maintainer-tools/.github/actions/inline-playwright-report@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
@@ -626,7 +626,8 @@ jobs:
           name: galata-test-assets-merged
           pattern: galata-test-assets-*
           delete-merged: true
-          retention-days: 30
+          # After a failure, long enough for galata-update-v2 to update the snapshots.
+          retention-days: ${{ contains(needs.*.result, 'failure') && 30 || 14 }}
 
       - name: Merge blobs and delete individual shards
         if: ${{ !cancelled() }}
